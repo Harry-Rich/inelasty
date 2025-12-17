@@ -17,6 +17,7 @@ def make_sbatch(job_name, time, nodes, ntasks_per_node, command, outdir = "."):
 #SBATCH --job-name={job_name}
 #SBATCH --output={outdir}/{job_name}_%j.out
 #SBATCH --nodes={nodes}
+#SBATCH --time={time}
 #SBATCH --ntasks-per-node={ntasks_per_node}
     
 cd $SLURM_SUBMIT_DIR

@@ -1,5 +1,6 @@
 # paths
-vasp_file_path = '/home/b55k/harryrich11.b55k/vasp'
+vasp_file_path = "/home/b55k/harryrich11.b55k/vasp"
+vasp_std_path = "/home/b55k/harryrich11.b55k/vasp/bin/vasp_std"
 
 # vasp settings 
 kpoint_kwargs = dict(
