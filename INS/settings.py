@@ -1,3 +1,7 @@
+# paths
+vasp_file_path = '/home/b55k/harryrich11.b55k/vasp'
+
+# vasp settings 
 kpoint_kwargs = dict(
     encut=800,
     ismear=0,

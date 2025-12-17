@@ -30,7 +30,7 @@ def save_and_submit_sbatch(script, path):
 
 
 
-class INeaSy():
+class inelasty():
     def __init__(self, struc):
         self.struc = struc
         os.environ['VASP_PP_PATH'] = '/home/b55k/harryrich11.b55k/vasp'

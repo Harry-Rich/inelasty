@@ -2,15 +2,15 @@ import sys
 from ase.io import read
 from ase.calculators.vasp import Vasp
 import os
-from settings import phonopy_kwargs
+from settings import phonopy_kwargs, vasp_file_path, vasp_std_path
 
-os.environ['VASP_PP_PATH'] = '/home/b55k/harryrich11.b55k/vasp'
+os.environ['VASP_PP_PATH'] = vasp_file_path
 
 path = sys.argv[1]
 atoms = read(f"{path}/POSCAR")
 
 calc = Vasp(
-    command="/home/b55k/harryrich11.b55k/vasp/bin/vasp_std > vasp.out",
+    command=f"{vasp_std_path} > vasp.out",
     directory=f"{path}",
     **phonopy_kwargs
 )
