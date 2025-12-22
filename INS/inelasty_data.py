@@ -9,6 +9,8 @@ from phonopy.structure.atoms import PhonopyAtoms
 from phonopy.interface.vasp import read_vasp, write_vasp, parse_set_of_forces
 import os
 import glob
+import json
+
 
 
 # Utility Functions
@@ -32,12 +34,21 @@ def save_and_submit_sbatch(script, path):
 
 
 class inelasty():
-    def __init__(self, struc):
+    def __init__(self, struc, vasp_path, conda_command, spack_command):
         self.struc = struc
-        os.environ['VASP_PP_PATH'] = '/home/b55k/harryrich11.b55k/vasp'
+        self.vasp_path = vasp_path
+        self.conda_command = conda_command
+        self.spack_command = spack_command
+        self.location = Path(__file__).resolve().parent
+        print(self.location)
+
+        os.environ['VASP_PP_PATH'] = vasp_path
+
+        
 
     def relax(self, 
-              atom_path,
+              vasp_kwargs1,
+              vasp_kwargs2,
               dir_name='geom_opt',
               time ="02:00:00" , 
               ntasks_per_node=12):
@@ -50,12 +61,14 @@ class inelasty():
         stage2 = f"{dir_name}/stage_2"
         os.makedirs(stage2, exist_ok = True)
 
+        vasp_json1 = json.dumps(vasp_kwargs1)
+        vasp_json2 = json.dumps(vasp_kwargs2)
+
+
         command = f"""
-source ~/miniforge3/bin/activate
-conda activate vasp
-. ~/spack/share/spack/setup-env.sh
-spack env activate vasp_fin
-python INS/geom_relax.py {atom_path} {dir_name}
+{self.conda_command}
+{self.spack_command}
+python {self.location}/geom_relax.py {dir_name} '{vasp_json1}' '{vasp_json2}' {self.vasp_path}
 """
         
         script = make_sbatch(
@@ -69,10 +82,10 @@ python INS/geom_relax.py {atom_path} {dir_name}
 
         save_and_submit_sbatch(script, stage1)
 
-    
-    
+
 
     def run_k_points(self, 
+                     vasp_kwargs,
                      kpoints_list = None, 
                      script = None, 
                      dir_name = 'kpoints',
@@ -84,17 +97,16 @@ python INS/geom_relax.py {atom_path} {dir_name}
         if kpoints_list is None:
             kpoints_list = [(1,1,1), (2,2,2), (3,3,3), (4,4,4), (5,5,5), (6,6,6)]
         os.makedirs(dir_name, exist_ok=True)
+        vasp_json = json.dumps(vasp_kwargs)
         for i,kpts in enumerate(kpoints_list):
             loop_dir = f"{dir_name}/{i+1}"
             os.makedirs(loop_dir, exist_ok = True)
             write(f"{loop_dir}/POSCAR",self.struc)
 
             command = f"""
-source ~/miniforge3/bin/activate
-conda activate vasp
-. ~/spack/share/spack/setup-env.sh
-spack env activate vasp_fin
-python INS/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]}
+{self.conda_command}
+{self.spack_command}
+python {self.location}/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]} '{vasp_json}' {self.vasp_path}
 """
 
             script = make_sbatch(
@@ -109,6 +121,7 @@ python INS/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]}
             save_and_submit_sbatch(script, loop_dir)
 
     def run_encut(self, 
+                  vasp_kwargs,
                   encut_list = None, 
                   script = None, 
                   dir_name = 'encut',
@@ -120,17 +133,16 @@ python INS/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]}
         if encut_list is None:
             encut_list = [200,300,400,500,600,700,800,900,1000,1100,1200,1300]
         os.makedirs(dir_name, exist_ok=True)
+        vasp_json = json.dumps(vasp_kwargs)
         for encut in encut_list:
             loop_dir = f"{dir_name}/{encut}"
             os.makedirs(loop_dir, exist_ok = True)
             write(f"{loop_dir}/POSCAR",self.struc)
 
             command = f"""
-source ~/miniforge3/bin/activate
-conda activate vasp
-. ~/spack/share/spack/setup-env.sh
-spack env activate vasp_fin
-python INS/encut_spe.py {loop_dir} {encut}
+{self.conda_command}
+{self.spack_command}
+python {self.location}/encut_spe.py {loop_dir} {encut} '{vasp_json}' {self.vasp_path}
 """
 
             script = make_sbatch(
@@ -146,6 +158,7 @@ python INS/encut_spe.py {loop_dir} {encut}
 
     def generate_phonopy(self, 
                          atom_path,
+                         vasp_kwargs = None,
                          dir_name = "phonopy",
                          supercell_size = 2, 
                          displacement = 0.01, 
@@ -171,13 +184,12 @@ python INS/encut_spe.py {loop_dir} {encut}
                 supercell,
             )
             if run == True:
+                vasp_json = json.dumps(vasp_kwargs)
                 command = f"""
-                source ~/miniforge3/bin/activate
-                conda activate vasp
-                . ~/spack/share/spack/setup-env.sh
-                spack env activate vasp_fin
-                python INS/phonopy_spe.py {submit_dir}
-                """
+{self.conda_command}
+{self.spack_command}
+python {self.location}/phonopy_spe.py {submit_dir} '{vasp_json}' {self.vasp_path}
+"""
 
                 script = make_sbatch(
                     job_name=f"phon_{i}",
@@ -189,11 +201,6 @@ python INS/encut_spe.py {loop_dir} {encut}
                 )
 
                 save_and_submit_sbatch(script, submit_dir)
-
-
-
-    
-
 
     @property
     def atoms(self):
