@@ -60,11 +60,11 @@ geom_relax_kwargs2 = dict(
 )
 
 phonopy_kwargs = dict(
-    kpts=(2,2,2),
-    encut=800,
+    kpts=(1,1,1),
+    encut=700,
     ismear=0,
     sigma=0.01,
-    prec="Accurate",
+    prec="accurate",
     gga="PE",
     ivdw=12,
     ediff=1e-8,

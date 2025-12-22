@@ -156,13 +156,12 @@ python INS/encut_spe.py {loop_dir} {encut}
         
         
         unitcell = read_vasp(atom_path)
-
         supercell_matrix = np.eye(3) * supercell_size
-
         phonon = Phonopy(unitcell, supercell_matrix)
         phonon.generate_displacements(distance=0.01)
         supercells = phonon.supercells_with_displacements
         os.makedirs(dir_name, exist_ok=True)
+        phonon.save(f"{dir_name}/phonopy_disp.yaml")
 
         for i, supercell in enumerate(supercells):
             submit_dir = f"{dir_name}/{dir_name}-{i}"
