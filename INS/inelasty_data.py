@@ -97,8 +97,11 @@ python {self.location}/geom_relax.py {dir_name} '{vasp_json1}' '{vasp_json2}' {s
         if kpoints_list is None:
             kpoints_list = [(1,1,1), (2,2,2), (3,3,3), (4,4,4), (5,5,5), (6,6,6)]
         os.makedirs(dir_name, exist_ok=True)
-        vasp_json = json.dumps(vasp_kwargs)
+
         for i,kpts in enumerate(kpoints_list):
+            kpoints_kwargs = vasp_kwargs
+            kpoints_kwargs['kpts'] = kpts
+            vasp_json = json.dumps(kpoints_kwargs)
             loop_dir = f"{dir_name}/{i+1}"
             os.makedirs(loop_dir, exist_ok = True)
             write(f"{loop_dir}/POSCAR",self.struc)
@@ -106,7 +109,7 @@ python {self.location}/geom_relax.py {dir_name} '{vasp_json1}' '{vasp_json2}' {s
             command = f"""
 {self.conda_command}
 {self.spack_command}
-python {self.location}/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]} '{vasp_json}' {self.vasp_path}
+python {self.location}/single_point.py {loop_dir} '{vasp_json}' {self.vasp_path}
 """
 
             script = make_sbatch(
@@ -128,21 +131,25 @@ python {self.location}/kpoint_spe.py {loop_dir} {kpts[0]} {kpts[1]} {kpts[2]} '{
                   time ="02:00:00" , 
                   ntasks_per_node=12):
         """
-        Run k_point single point energies for given structure, uses kpoint_spe.py so update vasp calc in that for settings etc.
+        Run encut single point energies for given structure
         """
         if encut_list is None:
             encut_list = [200,300,400,500,600,700,800,900,1000,1100,1200,1300]
         os.makedirs(dir_name, exist_ok=True)
         vasp_json = json.dumps(vasp_kwargs)
         for encut in encut_list:
+            encut_kwargs = vasp_kwargs
+            encut_kwargs['encut'] = encut
+            vasp_json = json.dumps(encut_kwargs)
             loop_dir = f"{dir_name}/{encut}"
+
             os.makedirs(loop_dir, exist_ok = True)
             write(f"{loop_dir}/POSCAR",self.struc)
 
             command = f"""
 {self.conda_command}
 {self.spack_command}
-python {self.location}/encut_spe.py {loop_dir} {encut} '{vasp_json}' {self.vasp_path}
+python {self.location}/single_point.py {loop_dir} '{vasp_json}' {self.vasp_path}
 """
 
             script = make_sbatch(
@@ -188,7 +195,7 @@ python {self.location}/encut_spe.py {loop_dir} {encut} '{vasp_json}' {self.vasp_
                 command = f"""
 {self.conda_command}
 {self.spack_command}
-python {self.location}/phonopy_spe.py {submit_dir} '{vasp_json}' {self.vasp_path}
+python {self.location}/single_point.py {submit_dir} '{vasp_json}' {self.vasp_path}
 """
 
                 script = make_sbatch(
