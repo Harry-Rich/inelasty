@@ -1,6 +1,4 @@
-
-
-# vasp settings 
+# vasp settings
 kpoint_kwargs = dict(
     encut=800,
     ismear=0,
@@ -10,12 +8,12 @@ kpoint_kwargs = dict(
     ivdw=12,
     ediff=1e-6,
     lasph=True,
-    nsw=0,          # single-point
+    nsw=0,  # single-point
     ibrion=-1,
 )
 
 encut_kwargs = dict(
-    kpts=(3,3,3),
+    kpts=(2, 2, 2),
     ismear=0,
     sigma=0.01,
     prec="Accurate",
@@ -23,7 +21,7 @@ encut_kwargs = dict(
     ivdw=12,
     ediff=1e-6,
     lasph=True,
-    nsw=0,          # single-point
+    nsw=0,  # single-point
     ibrion=-1,
 )
 
@@ -58,7 +56,7 @@ geom_relax_kwargs2 = dict(
 )
 
 phonopy_kwargs = dict(
-    kpts=(1,1,1),
+    kpts=(1, 1, 1),
     encut=700,
     ismear=0,
     sigma=0.01,
@@ -67,9 +65,6 @@ phonopy_kwargs = dict(
     ivdw=12,
     ediff=1e-8,
     lasph=True,
-    nsw=0,          # single-point
+    nsw=0,  # single-point
     ibrion=-1,
 )
-
-
-
