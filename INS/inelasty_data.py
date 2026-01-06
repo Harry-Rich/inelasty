@@ -369,49 +369,49 @@ python {self.location}/single_point.py {submit_dir} '{vasp_json}' {self.vasp_pat
                 save_and_submit_sbatch(script, submit_dir)
 
 
-def run_single(
-    self, vasp_kwargs, dir_name, script=None, time="02:00:00", ntasks_per_node=12
-):
+    def run_single(
+        self, vasp_kwargs, dir_name, script=None, time="02:00:00", ntasks_per_node=12
+    ):
+        """
+        Run a single-point VASP calculation.
+
+        A single Slurm job is generated and submitted using the provided
+        VASP calculator settings.
+
+        Parameters
+        ----------
+        vasp_kwargs : dict
+            ASE VASP calculator settings for the single-point calculation.
+        dir_name : str
+            Output directory for the calculation.
+        script : str, optional
+            Custom Slurm submission script. If not provided, one is generated.
+        time : str, optional
+            Slurm walltime.
+        ntasks_per_node : int, optional
+            Number of MPI tasks per node.
+        """
+
+        os.makedirs(dir_name, exist_ok=True)
+        write(f"{dir_name}/POSCAR", self.struc)
+        vasp_json = json.dumps(vasp_kwargs)
+
+        command = f"""
+    {self.conda_command}
+    {self.spack_command}
+    python {self.location}/single_point.py {dir_name} '{vasp_json}' {self.vasp_path}
     """
-    Run a single-point VASP calculation.
 
-    A single Slurm job is generated and submitted using the provided
-    VASP calculator settings.
+        script = make_sbatch(
+            job_name="vasp_sing",
+            time=time,
+            nodes=1,
+            ntasks_per_node=ntasks_per_node,
+            command=command,
+            outdir=dir_name,
+        )
 
-    Parameters
-    ----------
-    vasp_kwargs : dict
-        ASE VASP calculator settings for the single-point calculation.
-    dir_name : str
-        Output directory for the calculation.
-    script : str, optional
-        Custom Slurm submission script. If not provided, one is generated.
-    time : str, optional
-        Slurm walltime.
-    ntasks_per_node : int, optional
-        Number of MPI tasks per node.
-    """
-
-    os.makedirs(dir_name, exist_ok=True)
-    write(f"{dir_name}/POSCAR", self.struc)
-    vasp_json = json.dumps(vasp_kwargs)
-
-    command = f"""
-{self.conda_command}
-{self.spack_command}
-python {self.location}/single_point.py {dir_name} '{vasp_json}' {self.vasp_path}
-"""
-
-    script = make_sbatch(
-        job_name="vasp_sing",
-        time=time,
-        nodes=1,
-        ntasks_per_node=ntasks_per_node,
-        command=command,
-        outdir=dir_name,
-    )
-
-    save_and_submit_sbatch(script, dir_name)
+        save_and_submit_sbatch(script, dir_name)
 
     @property
     def atoms(self):
