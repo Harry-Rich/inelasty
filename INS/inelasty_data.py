@@ -370,7 +370,7 @@ python {self.location}/single_point.py {submit_dir} '{vasp_json}' {self.vasp_pat
 
 
     def run_single(
-        self, vasp_kwargs, dir_name, script=None, time="02:00:00", ntasks_per_node=12
+        self, vasp_kwargs, dir_name, script=None, time="02:00:00", ntasks_per_node=12, generate = False
     ):
         """
         Run a single-point VASP calculation.
@@ -390,10 +390,13 @@ python {self.location}/single_point.py {submit_dir} '{vasp_json}' {self.vasp_pat
             Slurm walltime.
         ntasks_per_node : int, optional
             Number of MPI tasks per node.
+        generate: bool, optional
+            
         """
-
-        os.makedirs(dir_name, exist_ok=True)
-        write(f"{dir_name}/POSCAR", self.struc)
+        if generate == True:
+            os.makedirs(dir_name, exist_ok=True)
+            write(f"{dir_name}/POSCAR", self.struc)
+        
         vasp_json = json.dumps(vasp_kwargs)
 
         command = f"""
