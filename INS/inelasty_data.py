@@ -337,7 +337,7 @@ python {self.location}/single_point.py {loop_dir} '{vasp_json}' {self.vasp_path}
         unitcell = read_vasp(atom_path)
         supercell_matrix = np.eye(3) * supercell_size
         phonon = Phonopy(unitcell, supercell_matrix)
-        phonon.generate_displacements(distance=0.01)
+        phonon.generate_displacements(distance=displacement)
         supercells = phonon.supercells_with_displacements
         os.makedirs(dir_name, exist_ok=True)
         phonon.save(f"{dir_name}/phonopy_disp.yaml")
